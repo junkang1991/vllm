@@ -31,9 +31,9 @@ SPARSE_BLOCK_SIZE = 128
 # which is arch-independent, so enable it on both gfx942 and gfx950.
 _IS_ROCM_MI3XX = tl.constexpr(False)
 if current_platform.is_rocm():
-    from vllm.platforms.rocm import on_gfx942, on_gfx950
+    from vllm.platforms.rocm import on_mi3xx
 
-    if on_gfx942() or on_gfx950():
+    if on_mi3xx():
         _IS_ROCM_MI3XX = tl.constexpr(True)
 
 

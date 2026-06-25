@@ -15,7 +15,7 @@ from vllm.models.minimax_m3.common.ops.sparse_attn import (
     SPARSE_BLOCK_SIZE,
     minimax_m3_sparse_attn_decode,
 )
-from vllm.platforms.rocm import on_gfx942, on_gfx950
+from vllm.platforms.rocm import on_gfx950, on_mi3xx
 from vllm.triton_utils import tl, triton
 
 __all__ = ["minimax_m3_sparse_attn", "minimax_m3_sparse_attn_decode"]
@@ -29,7 +29,7 @@ __all__ = ["minimax_m3_sparse_attn", "minimax_m3_sparse_attn_decode"]
 # and arch-independent, so it runs on both gfx942 and gfx950. SUB_K and the MFMA
 # launch params are arch-specific -- see the SUB_K constant and prefill_kwargs.
 # CDNA2 (gfx90a) and other AMD archs fall through to the dense path.
-_IS_MI3XX = tl.constexpr(on_gfx942() or on_gfx950())
+_IS_MI3XX = tl.constexpr(on_mi3xx())
 
 # Sub-tile width for the prefill kernel's per-block QK/PV GEMMs. gfx950 -> 64,
 # gfx942 -> 32 (re-tune with tune_sparse_attn.py). Must divide SPARSE_BLOCK_SIZE.
@@ -50,7 +50,7 @@ def _sparse_attn_prefill_kwargs() -> dict:
     global _SPARSE_ATTN_PREFILL_KWARG
     if _SPARSE_ATTN_PREFILL_KWARG is None:
         kwarg: dict = {}
-        if on_gfx942() or on_gfx950():
+        if on_mi3xx():
             kwarg = {
                 "num_warps": 1,
                 "matrix_instr_nonkdim": 16,
